@@ -51,6 +51,7 @@ def make_df_from_tweets(tweets):
     df = pd.DataFrame(
         data=[tweet.text for tweet in tweets], columns=['tweets'])
 
+    df['created_at'] = np.array([tweet.created_at for tweet in tweets])
     df["user location"] = np.array(
         [tweet._json['user']['location'] for tweet in tweets])
     df['id'] = np.array([tweet.id for tweet in tweets])
