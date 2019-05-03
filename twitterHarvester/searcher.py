@@ -1,11 +1,12 @@
 
 from tweepy import OAuthHandler
-from tweepy import API, Cursor
+from tweepy import API, Cursor, RateLimitError
 import numpy as np
 import pandas as pd
 from utils import make_df_from_tweets
 import time
 import json
+import sys
 
 
 from twitter_credentials import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
@@ -67,7 +68,14 @@ class TweeterSearchHarvester:
 
         while len(searched_tweets) <= wanted_amount:
             if len(searched_tweets) == 0:
-                tweets = self.api.search(q=query, geocode=geocode, count=100)
+                try:
+                    tweets = self.api.search(
+                        q=query, geocode=geocode, count=100)
+                except RateLimitError:
+                    print("Shold sleep")
+                    time.sleep(60 * 15)
+
+                    self.resetConnection()
             else:
                 tweets = self.api.search(
                     q=query, geocode=geocode, count=100, max_id=max_id-1)
@@ -87,7 +95,7 @@ class TweeterSearchHarvester:
 
             if len(searched_tweets) + current_count >= n_periods * self.limited_chuck_size:
                 print("take a break")
-                time.sleep(4)  # should be set to 15 mins
+                time.sleep(10)  # should be set to 15 mins
                 n_periods += 1
 
         new_count = len(searched_tweets) + current_count
@@ -131,12 +139,27 @@ def extractTweets(queries, file_to_save, location_center=MELBOURNE_GEO_CODE, rad
 if __name__ == "__main__":
 
     queries = ["Auspol", "labor", "liberal", "greens",
-               "united australia party", "GRN", "ALP", "LNP", "election", "vote"]
+               "united australia party", "GRN", "ALP", "LNP", "election", "vote",
+               "Scott morrison", "bill shorten"]
 
-    file_to_save = "sydney_search_json"
+    location = sys.argv[1]
+    if location == "sydney":
+        file_to_save = "sydney_search_json"
+        center = SYDNEY_GEO_CODE
+    elif location == 'melbourne':
+        file_to_save = "melbourne_search_json"
+        center = MELBOURNE_GEO_CODE
+    elif location == "brisbane":
+        file_to_save = "brisbane_search_json"
+        center = BRISBANE_GEO_CODE
+    elif location == "geelong":
+        file_to_save = "geelong_search_json"
+        center = GEELONG_GEO_CODE
+
     # queries = ["Auspol", "labor", "liberal"]
     key_word_max_ids = extractTweets(
-        queries, file_to_save, location_center=SYDNEY_GEO_CODE, radius="100km")
+        queries, file_to_save, location_center=location, radius="100km")
 
     with open("key_word_ids.json", "a") as f:
         f.write(json.dumps(key_word_max_ids) + "\n")
+
