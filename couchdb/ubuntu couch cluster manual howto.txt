@@ -1,0 +1,95 @@
+Ubuntu
+---------------------------
+
+Commands for all database nodes:
+
+
+add Security Group couch admin" to the VM
+
+
+echo "deb https://apache.bintray.com/couchdb-deb bionic main" \
+    | sudo tee -a /etc/apt/sources.list
+	
+	
+curl -L https://couchdb.apache.org/repo/bintray-pubkey.asc \
+    | sudo apt-key add -
+
+sudo apt-get update
+
+# replace the IP address below and execute as one big command:
+COUCHDB_PASSWORD=admin
+echo "couchdb couchdb/mode select clustered
+couchdb couchdb/mode seen true
+couchdb couchdb/nodename string couchdb@<IP ADDRESS>
+couchdb couchdb/nodename seen true
+couchdb couchdb/cookie string couchdb_cluster
+couchdb couchdb/cookie seen true
+couchdb couchdb/bindaddress string 0.0.0.0
+couchdb couchdb/bindaddress seen true
+couchdb couchdb/adminpass password ${COUCHDB_PASSWORD}
+couchdb couchdb/adminpass seen true
+couchdb couchdb/adminpass_again password ${COUCHDB_PASSWORD}
+couchdb couchdb/adminpass_again seen true" | sudo debconf-set-selections
+
+DEBIAN_FRONTEND=noninteractive sudo apt-get install -y --force-yes couchdb
+
+
+# change database_dir to volume storage mount point
+sudo vi /opt/couchdb/etc/local.ini
+#add line 
+database_dir=/mydir
+
+# change port range to the ones opened in the couchdb security group 
+sudo vi /opt/couchdb/etc/vm.args
+-kernel inet_dist_listen_min 9100
+-kernel inet_dist_listen_max 9200
+
+
+# restart couchdb to pick up new settings
+sudo systemctl stop couchdb
+sudo systemctl start couchdb
+
+export user=admin
+export pass=admin
+
+#Check install OK - output should say Welcome (optional)
+export node=<IP ADDRESS>
+curl http://${node}:5984/  
+
+-----------------------------------------------------------
+Only on the first node (172.26.38.39):
+
+# Join the nodes together
+
+For each remote node (172.26.38.116 and 172.26.37.45), set $node and execute the two curl commands below:
+export masternode=172.26.38.39
+#export node=172.26.38.116
+export node=172.26.37.45
+
+curl -XPOST "http://${user}:${pass}@${masternode}:5984/_cluster_setup" \
+      --header "Content-Type: application/json" \
+      --data "{\"action\": \"enable_cluster\", \"bind_address\":\"0.0.0.0\", \
+        \"username\": \"${user}\", \"password\":\"${pass}\", \"port\": \"5984\", \
+        \"remote_node\": \"${node}\", \
+        \"remote_current_user\":\"${user}\", \"remote_current_password\":\"${pass}\"}"
+
+curl -XPOST "http://${user}:${pass}@${masternode}:5984/_cluster_setup" \
+      --header "Content-Type: application/json" \
+      --data "{\"action\": \"add_node\", \"host\":\"${node}\", \
+        \"port\": \"5984\", \"username\": \"${user}\", \"password\":\"${pass}\"}"
+
+
+# check the membership, output of all_nodes should list all nodes, cluster_nodes should list all nodes 
+curl -X GET "http://${user}:${pass}@${node}:5984/_membership"
+		
+curl -XPOST "http://${user}:${pass}@${masternode}:5984/_cluster_setup" \
+    --header "Content-Type: application/json" --data "{\"action\": \"finish_cluster\"}" 
+	
+# verify cluster (optional)
+curl http://${user}:${pass}@${masternode}:5984/_cluster_setup
+
+#Create database:
+curl -XPUT "http://${user}:${pass}@${masternode}:5984/twitter"
+
+  
+ 
