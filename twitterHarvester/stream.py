@@ -8,15 +8,14 @@ from tweepy import OAuthHandler
 from tweepy import Stream
 
 
+# consumer key, consumer secret, access token, access secret.
+ckey = CONSUMER_KEY
+csecret = CONSUMER_SECRET
+atoken = ACCESS_TOKEN
+asecret = ACCESS_TOKEN_SECRET
 
-#consumer key, consumer secret, access token, access secret.
-ckey=CONSUMER_KEY
-csecret=CONSUMER_SECRET
-atoken=ACCESS_TOKEN
-asecret=ACCESS_TOKEN_SECRET
-
-auth = OAuthHandler(consumer_key, consumer_secret)
-auth.set_access_token(access_token, access_token_secret)
+auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 
 api = tweepy.API(auth, wait_on_rate_limit=True)
 db_tweet_name = 'tweet'
@@ -34,7 +33,8 @@ if db_user_name in db_server:
 else:
     db_user = db_server.create(db_user_name)
 
-bounding_box = [110.951034,-54.833766,159.287222,-9.187026]
+bounding_box = [110.951034, -54.833766, 159.287222, -9.187026]
+
 
 class listener(StreamListener):
 
@@ -61,19 +61,23 @@ class listener(StreamListener):
                 print(e)
                 pass
         return True
+
     def on_error(self, status):
-        print (status)
+        print(status)
+
     def on_exception(self, exception):
         print(exception)
         return
 
+
 def tweet_to_json(tweet):
-	    tweet_dict = {
-	        "text": json.loads(tweet)['text'],
-	        "author_name": json.loads(tweet)['user']['screen_name']
-	    }
-	    with open('tweet.json', 'a+') as f:
-	        json.write(tweet_dict, f)	
+    tweet_dict = {
+        "text": json.loads(tweet)['text'],
+        "author_name": json.loads(tweet)['user']['screen_name']
+    }
+    with open('tweet.json', 'a+') as f:
+        json.write(tweet_dict, f)
+
 
 myStreamListener = listener()
 myStream = Stream(auth=api.auth, listener=myStreamListener)

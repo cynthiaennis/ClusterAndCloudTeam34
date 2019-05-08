@@ -2,9 +2,7 @@ import pandas as pd
 import numpy as np
 import json
 import re
-
-
-
+import math
 
 
 def make_df_from_tweets(tweets):
@@ -37,3 +35,38 @@ def make_df_from_tweets(tweets):
     df['hashtags'] = np.array([tweet['entities']['hashtags']
                                for tweet in tweets])
     return df
+
+
+def distance(origin, destination):
+    lat1, lon1 = origin
+    lat2, lon2 = destination
+    radius = 6371  # km
+
+    dlat = math.radians(lat2-lat1)
+    dlon = math.radians(lon2-lon1)
+    a = math.sin(dlat/2) * math.sin(dlat/2) + math.cos(math.radians(lat1)) \
+        * math.cos(math.radians(lat2)) * math.sin(dlon/2) * math.sin(dlon/2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    d = radius * c
+
+    return d
+
+
+def find_box_center(north_east, south_west):
+
+    p1 = (north_east[0] + south_west[0]) / 2
+
+    p2 = (north_east[1] + south_west[1]) / 2
+
+    return (p1, p2)
+
+
+def calculate_radius(north_east, south_west):
+    """
+    Boundaries are from https://google-developers.appspot.com/maps/documentation/utils/geocoder/
+
+    """
+
+    center = find_box_center(north_east, south_west)
+
+    return distance(center, south_west)

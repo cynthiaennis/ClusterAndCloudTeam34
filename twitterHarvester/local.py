@@ -1,13 +1,13 @@
 
 from tweepy import OAuthHandler
 from tweepy import API, Cursor, RateLimitError
-import numpy as np
-import pandas as pd
+# import numpy as np
+# import pandas as pd
 from utils import make_df_from_tweets
 import time
 import json
 import sys
-import couchdb
+# import couchdb
 
 
 from low_income_cities_coordinates import Greater_Dandenong, Coffs_Harbour, Shoalhaven, Lismore, Fraser_Coast
@@ -24,20 +24,20 @@ from twitter_credentials import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACC
 # GEELONG_GEO_CODE = "-38.149918,144.361719"
 
 
-db_tweet_name = "search_api_tweets"
-db_user_name = 'user'
-db_address = "http://localhost:5984/"
-db_server = couchdb.Server(db_address)
+# db_tweet_name = "search_api_tweets"
+# db_user_name = 'user'
+# db_address = "http://localhost:5984/"
+# db_server = couchdb.Server(db_address)
 
-if db_tweet_name in db_server:
-    db_tweet = db_server[db_tweet_name]
-else:
-    db_tweet = db_server.create(db_tweet_name)
+# if db_tweet_name in db_server:
+#     db_tweet = db_server[db_tweet_name]
+# else:
+#     db_tweet = db_server.create(db_tweet_name)
 
-if db_user_name in db_server:
-    db_user = db_server[db_user_name]
-else:
-    db_user = db_server.create(db_user_name)
+# if db_user_name in db_server:
+#     db_user = db_server[db_user_name]
+# else:
+#     db_user = db_server.create(db_user_name)
 
 
 class TweeterSearchHarvester:
@@ -98,13 +98,8 @@ class TweeterSearchHarvester:
                         q=query, geocode=geocode, count=100)
 
                 else:
-                    try:
-                        tweets = self.api.search(
-                            q=query, geocode=geocode, count=100, max_id=max_id-1)
-                    except Exception as e:
-                        print(e)
-                        time.sleep(10)
-                        tweets = []
+                    tweets = self.api.search(
+                        q=query, geocode=geocode, count=100, max_id=max_id-1)
 
             except RateLimitError:
                 print("Shold sleep")
@@ -118,22 +113,23 @@ class TweeterSearchHarvester:
 
             max_id = tweets[-1]._json['id']
 
-            # # can store tweet into the database here or write into a file.
-            # with open(self.file_for_tweets, 'a+') as f:
-            #     for tweet in tweets:
-            #         dat = tweet._json
-            #         dat['method'] = "searchAPI" + "_" + "melbourne"
-            #         f.write(json.dumps(dat) + "\n")
-            for tweet in tweets:
-                dat = tweet._json
-                dat['method'] = "searchAPI_" + place_name
-                try:
-                    db_search[dat["id_str"]] = {"tweet": dat}
-                except Exception as e:
-                    print(e)
-                    pass
+            # can store tweet into the database here or write into a file.
+            with open(self.file_for_tweets, 'a+') as f:
+                for tweet in tweets:
+                    dat = tweet._json
+                    dat['method'] = "searchAPI_" + place_name
+                    f.write(json.dumps(dat) + "\n")
+                    print("adding " + dat["id_str"])
+            # for tweet in tweets:
+            #     dat = tweet._json
+            #     dat['method'] = "searchAPI_" + place_name
+            #     try:
+            #         db_search[dat["id_str"]] = {"tweet": dat}
+            #     except Exception as e:
+            #         print(e)
+            #         pass
 
-                print("adding " + dat["id_str"])
+            #     print("adding " + dat["id_str"])
 
             if len(searched_tweets) + current_count >= n_periods * self.limited_chuck_size:
                 print("take a break")
@@ -204,9 +200,9 @@ if __name__ == "__main__":
 
         R = calculate_radius(location_coor[0], location_coor[1])
 
-        # file_to_save = location + "_search.json"
+        file_to_save = "search.json"
 
-        extractTweets(queries=queries, file_to_save=None,
+        extractTweets(queries=queries, file_to_save=file_to_save,
                       location_center=center, radius=R, place_name=location)
 
     for location in low_income_areas:
@@ -217,7 +213,7 @@ if __name__ == "__main__":
 
         R = calculate_radius(location_coor[0], location_coor[1])
 
-        # file_to_save = location + "_search.json"
+        file_to_save = "search.json"
 
-        extractTweets(queries=queries, file_to_save=None,
+        extractTweets(queries=queries, file_to_save=file_to_save,
                       location_center=center, radius=R, place_name=location)
