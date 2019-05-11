@@ -7,10 +7,10 @@ export pass=admin
 curl -X PUT -d@application.js "http://${user}:${pass}@${node}:5984/twitter/_design/application"
 
 
-Example useage
+Example usage
 
 # query tweet counts per location
 curl http://${node}:5984/twitter/_design/application/_view/location_count_all?group=true
 
 # query positive tweet count per location
-http://${node}:5984/twitter/_design/application/_view/location_count_positive?group=true
+curl http://${node}:5984/twitter/_design/application/_view/location_count_positive?group=true
