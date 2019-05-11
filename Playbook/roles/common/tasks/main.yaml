@@ -1,0 +1,31 @@
+- name: setup proxies
+  lineinfile: 
+    dest: /etc/environment
+    line: '{{ item }}'
+  with_items:
+    - 'http_proxy="http://wwwproxy.unimelb.edu.au:8000"'
+    - 'https_proxy="http://wwwproxy.unimelb.edu.au:8000"'
+    - 'ftp_proxy="http://wwwproxy.unimelb.edu.au:8000"'    
+
+- name: update packages
+  apt: update_cache=yes
+
+- name: install essentials
+  apt: name={{ item }}
+  with_items:
+    - build-essential
+    - git-core
+    - curl
+    - zlib1g-dev
+    - libssl-dev
+    - libreadline-dev
+    - libyaml-dev
+    - libsqlite3-dev
+    - sqlite3
+    - libxml2-dev
+    - libxslt1-dev
+    - libcurl4-openssl-dev
+    - python-software-properties
+    - libffi-dev
+
+
