@@ -2,15 +2,16 @@
 export node=172.26.38.39
 export user=admin
 export pass=admin
+export db=new_twitter_search
 
 # create views for application use
-curl -X PUT -d@application.js "http://${user}:${pass}@${node}:5984/twitter/_design/application"
+curl -X PUT -d@application.js "http://${user}:${pass}@${node}:5984/${db}/_design/application"
 
 
-Example usage
+# Example usage
 
 # query tweet counts per location
-curl http://${node}:5984/twitter/_design/application/_view/location_count_all?group=true
+curl http://${node}:5984/${db}/_design/application/_view/location_count_all?group=true
 
 # query positive tweet count per location
-curl http://${node}:5984/twitter/_design/application/_view/location_count_positive?group=true
+curl http://${node}:5984/${db}/_design/application/_view/location_count_positive?group=true
