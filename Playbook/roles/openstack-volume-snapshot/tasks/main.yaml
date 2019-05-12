@@ -10,3 +10,7 @@
     force: yes
     availability_zone: '{{ availability_zone }}'
   loop: '{{ volumes }}'
+
+# Pause for 3 minutes for instances to spawn up.
+- pause:
+    minutes: 3

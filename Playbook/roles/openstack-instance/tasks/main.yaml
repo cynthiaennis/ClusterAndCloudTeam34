@@ -6,6 +6,7 @@
     image: '{{ instance_image }}'
     key_name: '{{ instance_key_name }}'
     flavor: '{{ instance_flavor}}'
+    network: '{{ network }}'
     availability_zone: '{{ availability_zone }}'
     security_groups: '{{ sg_names }}'
     volumes: '{{ item }}'
@@ -20,11 +21,14 @@
  #   msg: "Instance {{ instance_name }} has been created. IP address is {{ os_instance.openstack.public_v4 }}"
   #when: os_instance.openstack is defined
 
-  #Get a list of volume ids from the return value of os_volume
+  #Creating an in-memory host list, and adding the instances to appropriate host groups
 - name: Create a list of instance Ips
-  set_fact:
-    os_instance_ips: '{{ os_instance_ips|default([]) + [ item.openstack.public_v4 ] }}'
-  loop: '{{ os_instance.results }}'
+  add_host:
+    name:  '{{ item.0.openstack.name }}'
+    ansible_host: "{{ item.0.openstack.public_v4 }}"
+    group: "{{ item.1.group }}"
+  loop: '{{ os_instance.results|zip (host_groups)|list}}'
+
 
 - debug:
-    msg: "Instances at {{ os_instance_ips }} has been created."
+    msg: "Instances have been created."
