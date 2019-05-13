@@ -50,8 +50,8 @@ auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 
 api = tweepy.API(auth, wait_on_rate_limit=True)
 
-db_tweet_name = 'new_twitter_stream'
-db_user = 'user_ids'
+db_tweet_name = 'new_twitter_search'
+
 db_user_name = 'admin'
 db_password = "admin"
 
@@ -63,28 +63,30 @@ if db_tweet_name in db_server:
 else:
     db_tweet = db_server.create(db_tweet_name)
 
-db_user = db_server[db_user]
 
 
 bounding_box = [110.951034, -54.833766, 159.287222, -9.187026]
 
 
 def check_tweet(tweet):
-    if tweet["coordinates"] is not None:
-        for location in map_to_coor.keys():
+    try:
+        if tweet["coordinates"] is not None:
+            for location in map_to_coor.keys():
 
-            # If is in any location of interest
-            boundary = map_to_coor[location]
-            if utils.is_bounded_by(tweet["coordinates"]["coordinates"], boundary):
-                if utils.is_political(tweet['text']):
-                    tweet["tweet_location"] = location
+                # If is in any location of interest
+                boundary = map_to_coor[location]
+                if utils.is_bounded_by(tweet["coordinates"]["coordinates"], boundary):
+                    if utils.is_political(tweet['text']):
+                        tweet["tweet_location"] = location
 
-                    tweet['is_gegative_sentiment'] = utils.is_negative_sentiment(
-                        tweet['text'])
+                        tweet['is_gegative_sentiment'] = utils.is_negative_sentiment(
+                            tweet['text'])
 
-                    # save to database here.
-                    db_tweet[tweet['id_str']] = {"tweet": tweet}
-                    print("new tweet: "+tweet["id_str"])
+                        # save to database here.
+                        db_tweet[tweet['id_str']] = {"tweet": tweet}
+                        print("new tweet: "+tweet["id_str"])
+    except:
+        pass
 
 
 class listener(StreamListener):
