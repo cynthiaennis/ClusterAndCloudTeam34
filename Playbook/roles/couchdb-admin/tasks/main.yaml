@@ -1,0 +1,11 @@
+- name: post to node 1
+  shell: 'curl -XPOST "http://{{ couch_user }}:{{ COUCHDB_PASSWORD }}@{{ hostvars['couchadmin'].ansible_host }}:5984/_cluster_setup" --header "Content-Type: application/json" --data "{\"action\": \"enable_cluster\", \"bind_address\":\"0.0.0.0\", \"username\": \"{{couch_user}}\", \"password\":\"{{ COUCHDB_PASSWORD }}\", \"port\": \"5984\", \"remote_node\": \"{{ hostvars[groups['couchnode'][0]].ansible_host }}", \"remote_current_user\":\"({{ couch_user }})\", \"remote_current_password\":\"{{ COUCHDB_PASSWORD }}\"}"'
+  
+- name: post to node 1
+  shell: 'curl -XPOST "http://{{ couch_user }}:{{ COUCHDB_PASSWORD }}@{{ hostvars['couchadmin'].ansible_host }}:5984/_cluster_setup" --header "Content-Type: application/json" --data "{\"action\": \"add_node\", \"host\":\"{{ hostvars[groups['couchnode'][0]].ansible_host }}\", \"port\": \"5984\", \"username\": \"{{ couch_user }}\", \"password\":\"{{ COUCHDB_PASSWORD }}\"}"''
+
+- name: post to node 2
+  shell: 'curl -XPOST "http://{{ couch_user }}:{{ COUCHDB_PASSWORD }}@{{ hostvars['couchadmin'].ansible_host }}:5984/_cluster_setup" --header "Content-Type: application/json" --data "{\"action\": \"enable_cluster\", \"bind_address\":\"0.0.0.0\", \"username\": \"{{couch_user}}\", \"password\":\"{{ COUCHDB_PASSWORD }}\", \"port\": \"5984\", \"remote_node\": \"{{ hostvars[groups['couchnode'][1]].ansible_host }}", \"remote_current_user\":\"({{ couch_user }})\", \"remote_current_password\":\"{{ COUCHDB_PASSWORD }}\"}"'
+
+- name: post to node 2
+  shell: 'curl -XPOST "http://{{ couch_user }}:{{ COUCHDB_PASSWORD }}@{{ hostvars['couchadmin'].ansible_host }}:5984/_cluster_setup" --header "Content-Type: application/json" --data "{\"action\": \"add_node\", \"host\":\"{{ hostvars[groups['couchnode'][1]].ansible_host }}\", \"port\": \"5984\", \"username\": \"{{ couch_user }}\", \"password\":\"{{ COUCHDB_PASSWORD }}\"}"''

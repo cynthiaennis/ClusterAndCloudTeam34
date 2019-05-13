@@ -1,0 +1,91 @@
+- name: install tweepy
+  pip: 
+    name: tweepy
+
+- name: add repo for couchdb
+  sudo: yes
+  shell: "echo deb https://apache.bintray.com/couchdb-deb bionic main > /etc/apt/sources.list"
+
+- name: import couch repo key
+  sudo: yes
+  apt_key:
+    url: https://couchdb.apache.org/repo/bintray-pubkey.asc
+    state: present
+
+- name: update packages
+  apt: update_cache=yes
+
+- name: Select couchdb mode
+  debconf:
+    name: couchdb
+    question: couchdb/mode
+    value: clustered
+    vtype: select
+
+- name: Set couch nodename
+  debconf:
+    name: couchdb
+    question: couchdb/nodename
+    value: couchdb@<IP>
+    vtype: string
+
+- name: Set couch cookie
+  debconf:
+    name: couchdb
+    question: couchdb/cookie
+    value: couchdb_cluster
+    vtype: string
+
+- name: bind couch address
+  debconf:
+    name: couchdb
+    question: couchdb/bindaddress
+    value: 0.0.0.0
+    vtype: string
+
+- name: Set couch admin password
+  debconf:
+    name: couchdb
+    question: couchdb/adminpass
+    value: {{ COUCHDB_PASSWORD }}
+    vtype: password
+
+- name: Set couch admin password
+  debconf:
+    name: couchdb
+    question: couchdb/adminpass
+    value: {{ COUCHDB_PASSWORD }}
+    vtype: password
+
+
+- name: couchdb seen
+  debconf:
+    name: couchdb
+    question: couchdb/{{ item }}
+    value: 'true'
+    vtype: seen
+  loop:
+    - mode
+    - nodename
+    - cookie
+    - bindaddress
+    - adminpass
+    - adminpass_again
+
+- name: install couch
+  apt:    
+    name: couchdb
+    force: yes
+    environment:
+        DEBIAN_FRONTEND: noninteractive
+
+- name: change database_dir to volume storage mount point
+  lineinfile: 
+    dest: /opt/couchdb/etc/local.ini
+    line: database_dir=/mydir
+
+- name: Restart service couchdb, in all cases
+  service:
+    name: couchdb
+    state: restarted
+ 
