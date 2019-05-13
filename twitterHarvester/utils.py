@@ -1,40 +1,13 @@
-import pandas as pd
-import numpy as np
+
+from textblob import TextBlob
 import json
 import re
 import math
 
 
-def make_df_from_tweets(tweets):
-    """
-    Params
-    -------------------------
-    tweets : list of jsons
-
-    Returns
-    -------------------------
-    pd.Dataframe
-    """
-    df = pd.DataFrame(
-        data=[tweet['text'] for tweet in tweets], columns=['tweets'])
-    df['screen_name'] = np.array(
-        [tweet['user']["screen_name"] for tweet in tweets])
-    df["user_id"] = np.array(
-        [tweet['user']['id'] for tweet in tweets])
-    df["user_location"] = np.array(
-        [tweet['user']['location'] for tweet in tweets])
-    df['id'] = np.array([tweet['id'] for tweet in tweets])
-    df['len'] = np.array([len(tweet['text']) for tweet in tweets])
-    df['date'] = np.array([tweet['created_at'] for tweet in tweets])
-    df['source'] = np.array(
-        [re.sub('<[^<]+?>', '', tweet['source']) for tweet in tweets])
-    df['likes'] = np.array([tweet['favorite_count'] for tweet in tweets])
-    df['retweets'] = np.array([tweet['retweet_count'] for tweet in tweets])
-    df['coor'] = np.array([tweet["coordinates"] for tweet in tweets])
-
-    df['hashtags'] = np.array([tweet['entities']['hashtags']
-                               for tweet in tweets])
-    return df
+POLITICAL_KEY_WORDS = ["Auspol", "labor", "liberal", "greens",
+                       "united australia party", "GRN", "ALP", "LNP", "election", "vote",
+                       "Scott morrison", "bill shorten"]
 
 
 def distance(origin, destination):
@@ -70,3 +43,60 @@ def calculate_radius(north_east, south_west):
     center = find_box_center(north_east, south_west)
 
     return distance(center, south_west)
+
+
+def is_negative_sentiment(text):
+
+    blob = TextBlob(text)
+
+    score = blob.sentiment.polarity
+
+    if score < 0:
+        return 1
+    else:
+        return 0
+
+
+def is_bounded_by(coords, bounds):
+    """
+    bounds:
+         direct copy from google.
+         [[north , west],[south ,east] ]
+         [[max_lat , max_long]  , [min_lat , min_long] ]
+         melbourne lat long is -37 , 144
+    coord:
+          [longitude, latitude].
+
+           "coordinates": {
+                "type": "Point",
+                "coordinates": [
+                  151.02,
+                  -33.86
+                ]
+              }
+    """
+    min_lat = bounds[1][0]
+    min_long = bounds[1][1]
+
+    max_lat = bounds[0][0]
+    max_long = bounds[0][1]
+
+    target_lat = coords[1]
+    target_long = coords[0]
+
+    if target_lat >= min_lat and target_lat <= max_lat:
+        if target_long >= min_long and target_long <= max_long:
+            return True
+
+    return False
+
+
+def is_political(text):
+
+    text = text.lower()
+    for word in POLITICAL_KEY_WORDS:
+        if word.lower() in text:
+
+            return True
+
+    return False
