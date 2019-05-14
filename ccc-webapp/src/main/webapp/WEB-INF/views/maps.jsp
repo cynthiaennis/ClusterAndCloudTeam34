@@ -5,4 +5,9 @@
         <div id="map"></div>
     </tiles:putAttribute>
 
+    <tiles:putAttribute name="pagejs">
+        <!--  Google Maps Plugin    -->
+        <script src="https://maps.googleapis.com/maps/api/js?key="></script>
+        <script src="${pageContext.request.contextPath}/assets/demo/maps.js"></script>
+    </tiles:putAttribute>
 </tiles:insertDefinition>
