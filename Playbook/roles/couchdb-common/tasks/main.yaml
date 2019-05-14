@@ -2,6 +2,14 @@
   pip: 
     name: tweepy
 
+- name: install couchdb-python
+  pip: 
+    name: couchdb
+    
+- name: install textblob
+  pip:
+    name: textblob
+
 - name: add repo for couchdb
   sudo: yes
   shell: "echo deb https://apache.bintray.com/couchdb-deb bionic main > /etc/apt/sources.list"
@@ -26,7 +34,7 @@
   debconf:
     name: couchdb
     question: couchdb/nodename
-    value: couchdb@<IP>
+    value: couchdb@{{ ansible_eth0.ipv4.address }}
     vtype: string
 
 - name: Set couch cookie
@@ -47,14 +55,14 @@
   debconf:
     name: couchdb
     question: couchdb/adminpass
-    value: {{ COUCHDB_PASSWORD }}
+    value: "{{ COUCHDB_PASSWORD }}"
     vtype: password
 
-- name: Set couch admin password
+- name: Set couch admin password again 
   debconf:
     name: couchdb
-    question: couchdb/adminpass
-    value: {{ COUCHDB_PASSWORD }}
+    question: couchdb/adminpass_again
+    value: "{{ COUCHDB_PASSWORD }}"
     vtype: password
 
 
@@ -73,19 +81,30 @@
     - adminpass_again
 
 - name: install couch
-  apt:    
-    name: couchdb
-    force: yes
-    environment:
-        DEBIAN_FRONTEND: noninteractive
+  shell: DEBIAN_FRONTEND=noninteractive sudo apt-get install -y --force-yes couchdb
 
 - name: change database_dir to volume storage mount point
   lineinfile: 
     dest: /opt/couchdb/etc/local.ini
-    line: database_dir=/mydir
+    line: 'database_dir=/mydir'
+
+- name: change port range to the ones opened in the couchdb security group 
+  lineinfile: 
+    dest: /opt/couchdb/etc/vm.args
+    line: "{{ item }}"
+  with_items:
+    - '-kernel inet_dist_listen_min 9100'
+    - '-kernel inet_dist_listen_max 9200'
 
 - name: Restart service couchdb, in all cases
   service:
     name: couchdb
     state: restarted
+
+- name: close internal firewall
+  service: 
+    name: ufw
+    enabled: no
+    state: stopped
+
  

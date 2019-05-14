@@ -7,13 +7,14 @@
 
   roles:
     - role: openstack-common
-    - role: openstack-images
+    #- role: openstack-images
     - role: openstack-volume
     - role: openstack-security-group
     - role: openstack-instance
-    - role: openstack-volume-snapshot
 
-#common libraries across al nodes
+
+
+#common libraries across all nodes
 - hosts: all
   user: ubuntu
   sudo: yes
@@ -38,7 +39,7 @@
     - role: couchdb-common
 
 #couch cluster configuration
-hosts: couchadmin
+- hosts: couchadmin
   user: ubuntu
   sudo: yes
   vars_files:
@@ -48,3 +49,28 @@ hosts: couchadmin
 
   roles:
     - role: couchdb-admin
+
+#Run stream harvester on one node
+- hosts: couchadmin
+  user: ubuntu
+  sudo: yes
+  tasks:
+    - name: running the harvester
+      shell: cd /source/twitterHarvester; nohup python streamer.py </dev/null >/dev/null 2>&1 &
+      
+    
+
+#Run search harvester on 2 nodes
+- hosts: couchnode
+  user: ubuntu
+  sudo: yes
+  tasks:
+    - name: running the harvester
+      shell: cd /source/twitterHarvester; nohup python searcher.py </dev/null >/dev/null 2>&1 &
+
+#Run webserver
+- hosts: webserver
+  user: ubuntu
+  sudo: yes
+  roles:
+    - role: web-server

@@ -1,0 +1,21 @@
+---
+- name: uninstall existing jdk
+  apt:
+    pkg: openjdk*
+    state: absent
+  sudo: yes
+
+- name: install jdk
+  apt: name={{ item }}
+  with_items:
+    - openjdk-8-jdk
+
+
+- name: running rest api
+  shell: cd /source/team34-rest-api/; nohup java -jar team34-rest-api.jar --couchip="{{ hostvars[groups['couchadmin'][0]].ansible_host }}" --couchport=5984 </dev/null >/dev/null 2>&1 &
+  
+
+- name: running web server
+  shell: cd /source/ccc-webapp/; nohup java -jar webapp-runner-9.0.19.1.jar --port 8082 ccc-webapp.war </dev/null >/dev/null 3>&2 &
+  
+  
