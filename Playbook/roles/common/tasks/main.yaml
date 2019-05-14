@@ -1,3 +1,5 @@
+
+
 - name: setup proxies
   lineinfile: 
     dest: /etc/environment
@@ -16,6 +18,7 @@
     - build-essential
     - git-core
     - curl
+    - erlang
     - zlib1g-dev
     - libssl-dev
     - libreadline-dev
@@ -25,7 +28,13 @@
     - libxml2-dev
     - libxslt1-dev
     - libcurl4-openssl-dev
-    - python-software-properties
     - libffi-dev
+    - python-pip
+    - python3-pip
+
+- name: clone project repo
+  git:
+    repo: 'https://github.com/cynthiaennis/ClusterAndCloudTeam34.git'
+    dest: /source
 
 

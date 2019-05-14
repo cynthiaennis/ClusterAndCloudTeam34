@@ -5,7 +5,7 @@
     name: 'demo {{ item }}'
     image: '{{ instance_image }}'
     key_name: '{{ instance_key_name }}'
-    flavor: '{{ instance_flavor}}'
+    flavor: '{{ instance_flavor }}'
     network: '{{ network }}'
     availability_zone: '{{ availability_zone }}'
     security_groups: '{{ sg_names }}'
@@ -32,3 +32,7 @@
 
 - debug:
     msg: "Instances have been created."
+
+# Pause for 3 minutes for instances to spawn up.
+- pause:
+    minutes: 3

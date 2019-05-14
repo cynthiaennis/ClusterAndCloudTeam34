@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "restapi.couch.ip",
+      "type": "java.lang.String",
+      "description": "Description for restapi.couch.ip."
+  }
+] }

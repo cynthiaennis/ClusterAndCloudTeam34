@@ -1,6 +1,12 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib uri="http://tiles.apache.org/tags-tiles" prefix="tiles" %>
 
+
+<c:set var="scheme" value="${pageContext.request.scheme}"></c:set>
+<c:set var="serverport" value="${pageContext.request.serverPort}"></c:set>
+<c:set var="port" value=":${serverport}"></c:set>
+<c:set var="context" value="${pageContext.request.contextPath}"></c:set>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -22,6 +28,9 @@
     <link href="${pageContext.request.contextPath}/assets/css/material-dashboard.css?v=2.1.1" rel="stylesheet"/>
     <!-- CSS Just for demo purpose, don't include it in your project -->
     <link href="${pageContext.request.contextPath}/assets/demo/demo.css" rel="stylesheet"/>
+    <script type="text/javascript">
+        var resturi = "${scheme}://${pageContext.request.serverName}:8081";
+    </script>
 </head>
 
 <body class="">
@@ -50,8 +59,8 @@
 <script src="${pageContext.request.contextPath}/assets/js/plugins/bootstrap-selectpicker.js"></script>
 <!--  Plugin for the DateTimePicker, full documentation here: https://eonasdan.github.io/bootstrap-datetimepicker/ -->
 <script src="${pageContext.request.contextPath}/assets/js/plugins/bootstrap-datetimepicker.min.js"></script>
-<!--  DataTables.net Plugin, full documentation here: https://datatables.net/  -->
-<script src="${pageContext.request.contextPath}/assets/js/plugins/jquery.dataTables.min.js"></script>
+<%--<!--  DataTables.net Plugin, full documentation here: https://datatables.net/  -->--%>
+<%--<script src="${pageContext.request.contextPath}/assets/js/plugins/jquery.dataTables.min.js"></script>--%>
 <!--	Plugin for Tags, full documentation here: https://github.com/bootstrap-tagsinput/bootstrap-tagsinputs  -->
 <script src="${pageContext.request.contextPath}/assets/js/plugins/bootstrap-tagsinput.js"></script>
 <!-- Plugin for Fileupload, full documentation here: http://www.jasny.net/bootstrap/javascript/#fileinput -->
@@ -66,8 +75,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/2.4.1/core.js"></script>
 <!-- Library for adding dinamically elements -->
 <script src="${pageContext.request.contextPath}/assets/js/plugins/arrive.min.js"></script>
-<!--  Google Maps Plugin    -->
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCQzSm_5ZC3oYuOYXbmzgofja1ZDKxPUp4"></script>
 <!-- Chartist JS -->
 <script src="${pageContext.request.contextPath}/assets/js/plugins/chartist.min.js"></script>
 <!--  Notifications Plugin    -->
@@ -248,13 +255,6 @@
 
             });
         });
-    });
-</script>
-<script>
-    $(document).ready(function () {
-        // Javascript method's body can be found in assets/js/demos.js
-        md.initDashboardPageCharts();
-        demo.initGoogleMaps();
     });
 </script>
 </body>
