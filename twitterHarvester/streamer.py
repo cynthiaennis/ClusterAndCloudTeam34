@@ -1,6 +1,6 @@
 import tweepy
 from urllib3.exceptions import ProtocolError
-from twitter_credentials import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
+from Twitter_Credentials import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
 import json
 import couchdb
 from tweepy import StreamListener
